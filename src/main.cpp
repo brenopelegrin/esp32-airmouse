@@ -135,6 +135,8 @@ MPU6050 mpu;
 #define SDA_PIN 21
 #define SCL_PIN 22
 
+#define HALL_PIN 32
+
 #define BT_NAME "esp32-airmouse"
 
 #include "BluetoothSerial.h"
@@ -150,6 +152,7 @@ uint8_t devStatus;      // return status after each device operation (0 = succes
 uint16_t packetSize;    // expected DMP packet size (default is 42 bytes)
 uint16_t fifoCount;     // count of all bytes currently in FIFO
 uint8_t fifoBuffer[64]; // FIFO storage buffer
+float valorHall = 0.0;
 
 // orientation/motion vars
 Quaternion q;           // [w, x, y, z]         quaternion container
@@ -177,6 +180,7 @@ void dmpDataReady() {
 // ================================================================
 
 void setup() {
+    pinMode(HALL_PIN, INPUT);
     // join I2C bus (I2Cdev library doesn't do this automatically)
     #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
         Wire.begin(SDA_PIN, SCL_PIN);
@@ -264,6 +268,7 @@ void setup() {
 
 void loop() {
     // if programming failed, don't try to do anything
+    valorHall = analogRead(HALL_PIN) * (3.3 / 4095.0);
     if (!dmpReady) return;
     // read a packet from FIFO
     if (mpu.dmpGetCurrentFIFOPacket(fifoBuffer)) { // Get the Latest packet 
@@ -357,7 +362,7 @@ void loop() {
             SerialBT.print(aaWorld.y);
             SerialBT.print(",");
             SerialBT.print(aaWorld.z);
-            SerialBT.print("]");
+            SerialBT.print("],");
         #endif
     
         #ifdef OUTPUT_TEAPOT
@@ -373,7 +378,8 @@ void loop() {
             Serial.write(teapotPacket, 14);
             teapotPacket[11]++; // packetCount, loops at 0xFF on purpose
         #endif
-
+        SerialBT.print("\"hall\":");
+        SerialBT.print(valorHall);
         SerialBT.println("}");
 
         // blink LED to indicate activity

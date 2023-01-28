@@ -17,6 +17,20 @@ def animate_3line(i, ax, dataList, ser, line):
     ax.grid()
     ax.legend()
 
+def animate_1line(i, ax, dataList, ser, line):
+    atual = np.array(get_samples(ser, 1)[0][line])
+    dataList.append(atual)
+    
+    dataList = dataList[-50:]
+    dataList_arr = np.array(dataList)
+    
+    ax.clear()
+    ax.plot(dataList_arr, label="x")
+    ax.set_title(line)
+    ax.set_ylabel("")
+    ax.grid()
+    ax.legend()
+
 def animate_4line(i, ax, dataList, ser, line):
     atual = np.array(get_samples(ser, 1)[0][line])
     dataList.append([atual[0], atual[1], atual[2], atual[3]])
