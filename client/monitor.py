@@ -3,7 +3,7 @@ import time
 import json
 import os.path
 port = "/dev/rfcomm0"
-ser = connect_serial(port)
+ser = connect_BTserial(port)
 
 dataType = {
     "ypr": [],

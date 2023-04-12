@@ -7,8 +7,13 @@ recursion_track = 0
 max_recursion = 100
 deviceError = False
 
-def connect_serial(port):
+def connect_BTserial(port):
     ser = serial.Serial(port)
+    print("Listening on port {}.".format(ser.name))
+    return ser
+
+def connect_USBserial(port, baudrate):
+    ser = serial.Serial(port, baudrate)
     print("Listening on port {}.".format(ser.name))
     return ser
 

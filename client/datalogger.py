@@ -4,7 +4,7 @@ import json
 import os.path
 port = "/dev/rfcomm0"
 output_file = "outputs/output.json"
-ser = connect_serial(port)
+ser = connect_BTserial(port)
 
 dataType = {
     "ypr": [],

@@ -120,9 +120,7 @@ MPU6050 mpu;
 //#define OUTPUT_TEAPOT
 #define OUTPUT_MOTION6
 
-
-#define INTERRUPT_PIN 2  // use pin 2 on Arduino Uno & most boards
-#define LED_PIN 9 // (Arduino is 13, Teensy is 11, Teensy++ is 6)
+#include "pinout.h"
 
 #define X_ACC_OFF -3345
 #define Y_ACC_OFF -145
@@ -132,16 +130,58 @@ MPU6050 mpu;
 #define Y_GYR_OFF -8
 #define Z_GYR_OFF 5
 
-#define SDA_PIN 21
-#define SCL_PIN 22
+#define USE_USB_SERIAL_INSTEAD_OF_BT_SERIAL
 
-#define HALL_PIN 32
+#ifdef USE_USB_SERIAL_INSTEAD_OF_BT_SERIAL
+    #define SerialBT Serial
+    #define BT_NAME 115200
+#endif
 
-#define BT_NAME "esp32-airmouse"
+#ifndef USE_USB_SERIAL_INSTEAD_OF_BT_SERIAL
+    #include "BluetoothSerial.h"
+    #define BT_NAME "esp32-airmouse"
+    BluetoothSerial SerialBT;
+#endif
 
-#include "BluetoothSerial.h"
+// The class of Hall Effect Sensor
 
-BluetoothSerial SerialBT;
+#include <iostream>
+class Hall{
+    private:
+        static const int hallArraySize = HALL_ARRAY_SIZE;
+        double hallValues[hallArraySize] = {0};
+        const int hallPins[hallArraySize] = HALL_PINS;
+
+    public:
+        void initializeHallPins(){
+            int i=0;
+            for(i=0; i<hallArraySize; i++){
+                pinMode(hallPins[i], INPUT);
+            }   
+        };
+
+        void readAll(){
+            int i=0;
+            for(i=0; i<hallArraySize; i++){
+                hallValues[i] = analogRead(hallPins[i]) * (3.3 / 4095.0);
+            }
+        };
+
+        std::string getArrayAsString(){
+            std::string Result = "[";
+
+            int i=0;
+            for(i=0; i<hallArraySize; i++){
+                Result+= std::to_string(hallValues[i]);
+                if(i < hallArraySize-1){
+                    Result+=", ";
+                }
+            };
+
+            Result+="]";
+            return Result;
+        };
+};
 
 bool blinkState = false;
 
@@ -152,7 +192,7 @@ uint8_t devStatus;      // return status after each device operation (0 = succes
 uint16_t packetSize;    // expected DMP packet size (default is 42 bytes)
 uint16_t fifoCount;     // count of all bytes currently in FIFO
 uint8_t fifoBuffer[64]; // FIFO storage buffer
-float valorHall = 0.0;
+std::string hallArrayAsString;
 
 // orientation/motion vars
 Quaternion q;           // [w, x, y, z]         quaternion container
@@ -179,8 +219,10 @@ void dmpDataReady() {
 // ===                      INITIAL SETUP                       ===
 // ================================================================
 
+Hall myHall;
+
 void setup() {
-    pinMode(HALL_PIN, INPUT);
+    myHall.initializeHallPins();
     // join I2C bus (I2Cdev library doesn't do this automatically)
     #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
         Wire.begin(SDA_PIN, SCL_PIN);
@@ -261,14 +303,15 @@ void setup() {
 }
 
 
-
 // ================================================================
 // ===                    MAIN PROGRAM LOOP                     ===
 // ================================================================
 
 void loop() {
     // if programming failed, don't try to do anything
-    valorHall = analogRead(HALL_PIN) * (3.3 / 4095.0);
+    myHall.readAll();
+    hallArrayAsString = myHall.getArrayAsString();
+
     if (!dmpReady) return;
     // read a packet from FIFO
     if (mpu.dmpGetCurrentFIFOPacket(fifoBuffer)) { // Get the Latest packet 
@@ -379,7 +422,7 @@ void loop() {
             teapotPacket[11]++; // packetCount, loops at 0xFF on purpose
         #endif
         SerialBT.print("\"hall\":");
-        SerialBT.print(valorHall);
+        SerialBT.print(hallArrayAsString.c_str());
         SerialBT.println("}");
 
         // blink LED to indicate activity
