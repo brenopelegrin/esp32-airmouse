@@ -15,7 +15,7 @@ Before running any script of the client-side, if you are going to use Bluetooth,
 sudo rfcomm bind 0 24:0A:C4:EE:A3:32 1
 ```
 
-**datalogger.py**
+#### **datalogger.py**
 This script listens to the ESP32 on bluetooth or other serial and logs the data into files.
 You can customize the variables in the code:
 
@@ -30,7 +30,7 @@ After configuring, run the script:
 python datalogger.py
 ```
 
-**monitor.py**
+#### **monitor.py**
 This script listens to the ESP32 on bluetooth or other serial and print the output on terminal.
 You can customize the variables in the code:
 
@@ -44,7 +44,7 @@ After configuring, run the script:
 python monitor.py
 ```
 
-**animator.py**
+#### **animator.py**
 This script listens to the ESP32 on bluetooth or other serial and plot some graphics about the data.
 
 To run the script, do:
