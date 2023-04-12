@@ -1,7 +1,3 @@
-# esp32-airmouse
-This project aims to create a Human-Machine interface (HMI) based on an Inertial Measurement Unit (IMU). The IMU converts inertial data into movement in the computer screen that can be used to control things.
-
-## Directory strucutre
 ### client
 Here, there is the source code for the pc-side client that will listen to ESP32 data on Bluetooth, plot graphics, log data and convert data into movement.
 
@@ -55,7 +51,3 @@ To run the script, do:
 ```bash
 python animated_plotter.py
 ```
-
-### src
-
-Here we have the code that needs to be uploaded into ESP32. We use PlatformIO for this.
