@@ -6,5 +6,5 @@
 
 #define HALL_PIN 32
 
-#define HALL_ARRAY_SIZE 3;
-#define HALL_PINS {33,34,35};
+#define HALL_ARRAY_SIZE 5;
+#define HALL_PINS {27,26,25,33,32};
